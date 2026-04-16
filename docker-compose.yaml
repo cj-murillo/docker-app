@@ -1,0 +1,32 @@
+services:
+
+  web:
+    image: nginx:alpine
+    container_name: mi-web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+    networks:
+      - mi-red-interna
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    container_name: mi-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - mi-red-interna
+
+volumes:
+  db-data:
+
+networks:
+  mi-red-interna:
+    driver: bridge

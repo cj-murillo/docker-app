@@ -1,0 +1,28 @@
+name: Deploy Docker Compose en máquina local
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted # ← usa TU máquina, no los servidores de GitHub
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Crear archivo .env
+        run: |
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+
+      - name: Bajar stack anterior (si existe)
+        run: docker compose down --remove-orphans
+
+      - name: Levantar stack actualizado
+        run: docker compose up -d
+
+      - name: Verificar que los servicios están corriendo
+        run: docker compose ps
