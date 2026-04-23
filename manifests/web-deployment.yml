@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: tienda
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret          # El Secret creado en el Paso 3
+      containers:
+        - name: frontend
+          image: ghcr.io/TU_USUARIO/mi-frontend:latest   # ← tu imagen real de GHCR
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: nginx-config-vol
+              mountPath: /etc/nginx/conf.d
+      volumes:
+        - name: nginx-config-vol
+          configMap:
+            name: nginx-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: tienda
+spec:
+  selector:
+    app: web
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30080
+  type: NodePort
